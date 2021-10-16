@@ -69,6 +69,9 @@
 
         var tickDuration = 750;
 
+        var legandStyle = 1;
+        //change{Single:1,MultiText:2,TextwithFlag:3,OnlyFlag:4,Multitext:5}
+
         var top_n = 10;
         var height = 550;
         var width = 960;
@@ -112,7 +115,7 @@
 
         d3.csv('..\\data\\output.csv').then(function (data) {
             debugger;
-            data.forEach((d, i) => d.color = d3.hsl(Math.random() * 360, 0.75, 0.75));
+            data.forEach((d, i) => d.color = d3.hsl(Math.random() * 360, 1, 0.75));
 
             let yearSlice = data.sort((a, b) => {
                 return d3.descending(+a[year], +b[year])
@@ -176,15 +179,30 @@
                 .attr('height', y(1) - y(0) - barPadding)
                 .style('fill', d => d.color);
 
-            svg.selectAll('text.label')
-                .data(yearSlice, d => d.name)
-                .enter()
-                .append('text')
-                .attr('class', 'label')
-                .attr('x', d => x(d[year]) - 8)
-                .attr('y', d => y(d.rank) + 5 + ((y(1) - y(0)) / 2) + 1)
-                .style('text-anchor', 'end')
-                .html(d => d.name);
+            if (legandStyle == 1) {
+
+                svg.selectAll('text.label')
+                    .data(yearSlice, d => d.name)
+                    .enter()
+                    .append('text')
+                    .attr('class', 'label')
+                    .attr('x', d => x(d[year]) - 8)
+                    .attr('y', d => y(d.rank) + 5 + ((y(1) - y(0)) / 2) + 1)
+                    .style('text-anchor', 'end')
+                    .html(d => d.name);
+            }
+            else if (legandStyle == 2) {
+                svg.selectAll('text.label')
+                    .data(yearSlice, d => d.name)
+                    .enter()
+                    .append('text')
+                    .attr('class', 'label')
+                    .attr('x', d => x(d[year]) - 8)
+                    .attr('y', d => y(d.rank) + 5 + ((y(1) - y(0)) / 2) + 1)
+                    .style('text-anchor', 'end')
+                    .html(d => d.name);
+            }
+
 
             svg.selectAll('text.valueLabel')
                 .data(yearSlice, d => d.name)
@@ -262,35 +280,71 @@
                 let labels = svg.selectAll('.label')
                     .data(yearSlice, d => d.name);
 
-                labels
-                    .enter()
-                    .append('text')
-                    .attr('class', 'label')
-                    .attr('x', d => x(d[year]) - 8)
-                    .attr('y', d => y(top_n + 1) + 5 + ((y(1) - y(0)) / 2))
-                    .style('text-anchor', 'end')
-                    .html(d => d.name)
-                    .transition()
-                    .duration(tickDuration)
-                    .ease(d3.easeLinear)
-                    .attr('y', d => y(d.rank) + 5 + ((y(1) - y(0)) / 2) + 1);
+                if (legandStyle == 1) {
+                        labels
+                        .enter()
+                        .append('text')
+                        .attr('class', 'label')
+                        .attr('x', d => x(d[year]) - 8)
+                        .attr('y', d => y(top_n + 1) + 5 + ((y(1) - y(0)) / 2))
+                        .style('text-anchor', 'end')
+                        .html(d => d.name)
+                        .transition()
+                        .duration(tickDuration)
+                        .ease(d3.easeLinear)
+                        .attr('y', d => y(d.rank) + 5 + ((y(1) - y(0)) / 2) + 1);
+
+                    labels
+                        .transition()
+                        .duration(tickDuration)
+                        .ease(d3.easeLinear)
+                        .attr('x', d => x(d[year]) - 8)
+                        .attr('y', d => y(d.rank) + 5 + ((y(1) - y(0)) / 2) + 1);
+
+                    labels
+                        .exit()
+                        .transition()
+                        .duration(tickDuration)
+                        .ease(d3.easeLinear)
+                        .attr('x', d => x(d[year]) - 8)
+                        .attr('y', d => y(top_n + 1) + 5)
+                        .remove();
+                }
+                else if (legandStyle == 2) {
+
+                        labels
+                        .enter()
+                        .append('text')
+                        .attr('class', 'label')
+                        .attr('x', d => x(d[year]) - 8)
+                        .attr('y', d => y(top_n + 1) + 5 + ((y(1) - y(0)) / 2))
+                        .style('text-anchor', 'end')
+                        .html(d => d.name)
+                        .transition()
+                        .duration(tickDuration)
+                        .ease(d3.easeLinear)
+                        .attr('y', d => y(d.rank) + 5 + ((y(1) - y(0)) / 2) + 1);
 
 
-                labels
-                    .transition()
-                    .duration(tickDuration)
-                    .ease(d3.easeLinear)
-                    .attr('x', d => x(d[year]) - 8)
-                    .attr('y', d => y(d.rank) + 5 + ((y(1) - y(0)) / 2) + 1);
+                    labels
+                        .transition()
+                        .duration(tickDuration)
+                        .ease(d3.easeLinear)
+                        .attr('x', d => x(d[year]) - 8)
+                        .attr('y', d => y(d.rank) + 5 + ((y(1) - y(0)) / 2) + 1);
 
-                labels
-                    .exit()
-                    .transition()
-                    .duration(tickDuration)
-                    .ease(d3.easeLinear)
-                    .attr('x', d => x(d[year]) - 8)
-                    .attr('y', d => y(top_n + 1) + 5)
-                    .remove();
+                    labels
+                        .exit()
+                        .transition()
+                        .duration(tickDuration)
+                        .ease(d3.easeLinear)
+                        .attr('x', d => x(d[year]) - 8)
+                        .attr('y', d => y(top_n + 1) + 5)
+                        .remove();
+                }
+
+
+                
 
                 let valueLabels = svg.selectAll('.valueLabel').data(yearSlice, d => d.name);
 
