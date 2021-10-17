@@ -64,17 +64,34 @@
 
         // Feel free to change or delete any of the code you see in this editor!
         var svg = d3.select("body").append("svg")
-            .attr("width", 960)
-            .attr("height", 550);
+            .attr("width", window.innerWidth-20)
+            .attr("height", 550)
+            .attr("padding-left", 50)
+            .attr("padding-right",50)
 
-        var tickDuration = 750;
+        var tickDuration = 300;
+        //change{500,750,1000}
 
         var legandStyle = 1;
         //change{Single:1,MultiText:2,TextwithFlag:3,OnlyFlag:4,Multitext:5}
 
+        var dataFrequency = 1;
+        //change{Monthly=1;Yearly=2}
+
+        var startTime = 1950;
+        var startEnd = 2020;
+
+        var chartTitle = '18 years of Interbrand’s Top Global Brands';
+
+        var chartsubTitle = 'Brand Value ($M)';
+
+        var chartSources = 'InterBand';
+
+        var csvdataPath = "..\\data\\output.csv";
+
         var top_n = 10;
         var height = 550;
-        var width = 960;
+        var width = 1150;
 
         const margin = {
             top: 80,
@@ -89,32 +106,32 @@
             .attr('class', 'title')
             .attr('y', 24)
             .attr('x',200)
-            .html('18 years of Interbrand’s Top Global Brands');
-         //change
+            .html(chartTitle);
 
+         //change
         let subTitle = svg.append("text")
             .attr("class", "subTitle")
             .attr("y", 55)
             .attr('x',200)
-            .html("Brand Value($m)");
+            .html(chartsubTitle);
 
         //change
-
         let caption = svg.append('text')
             .attr('class', 'caption')
             .attr('x', width)
             .attr('y', height - 5)
             .style('text-anchor', 'end')
-            .html('Source: Interbrand');
+            .html(`Source: ${chartSources}`);
 
          //change
+        let year = startTime;
+        if (dataFrequency == 1) {
+            year = d3.format('.2f')((+year) + 0.01);
+        }
 
-        let year = 2001.01;
-        //change
 
-
-        d3.csv('..\\data\\output.csv').then(function (data) {
-            debugger;
+        d3.csv(csvdataPath).then(function (data) {
+            
             data.forEach((d, i) => d.color = d3.hsl(Math.random() * 360, 1, 0.75));
 
             let yearSlice = data.sort((a, b) => {
@@ -343,9 +360,6 @@
                         .remove();
                 }
 
-
-                
-
                 let valueLabels = svg.selectAll('.valueLabel').data(yearSlice, d => d.name);
 
                 valueLabels
@@ -384,21 +398,30 @@
 
                 yearText.html(~~year);
 
-                if (year == "2019.11") ticker.stop();
+                if (dataFrequency == 1) {
+                    if (year == d3.format('.2f')((+startEnd) + 0.11))
+                        ticker.stop();
+                        //change
 
-                //change
-
-                if (!year.toString().includes(".12")) {
-                    year = d3.format('.2f')((+year) + 0.01);
+                    if (!year.toString().includes(".12")) {
+                        year = d3.format('.2f')((+year) + 0.01);
+                    }
+                    else {
+                        year = parseInt(year) + 1;
+                        year = d3.format('.2f')((+year) + 0.01);
+                    }
                 }
                 else {
+                    if (year == startEnd)
+                        ticker.stop();
+                    //change
                     year = parseInt(year) + 1;
-                    year = d3.format('.2f')((+year) + 0.01);
+                   
                 }
+                
             }, tickDuration);
 
         });
-
         const halo = function (text, strokeWidth) {
             text.select(function () { return this.parentNode.insertBefore(this.cloneNode(true), this); })
                 .style('fill', '#ffffff')
