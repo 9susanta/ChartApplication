@@ -12,6 +12,14 @@ namespace ChartApplication.Controllers
         {
             return View();
         }
+        public ActionResult Index2()
+        {
+            return View();
+        }
+        public ActionResult LineCharts()
+        {
+            return View();
+        }
 
         public ActionResult About()
         {

@@ -81,7 +81,7 @@
     </style>
 
     <div>
-        <script src="http://d3js.org/d3.v5.min.js"></script>
+        <script src="https://d3js.org/d3.v5.min.js"></script>
         <div id="graph"></div>
         <script>
             // width and height
@@ -180,7 +180,7 @@
             var color = d3.scaleOrdinal(d3.schemeTableau10)
 
             // import json data
-            d3.json("covid-19-us-daily.json").then(function (data) {
+            d3.json("..//data//covid-19-us-daily.json").then(function (data) {
                 debugger;
                 // create array of dict for colors and and icons
                 var case_types = [{ 'id': 'positiveIncrease', "title": "Positive Cases", "color": ["#fff3cc", "#ffc500", "#c21500"], "flag": "coronavirus.png" },
