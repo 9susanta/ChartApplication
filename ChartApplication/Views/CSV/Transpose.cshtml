@@ -1,0 +1,17 @@
+﻿
+@{
+    ViewBag.Title = "Transpose";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h2>Upload File the file in Yearly for Transpose</h2>
+@using (Html.BeginForm("Transpose", "CSV", FormMethod.Post, new { enctype = "multipart/form-data" }))
+{
+    <div>
+        @Html.TextBox("file", "", new { type = "file" }) <br />
+        <input type="submit" class="btn btn-success" value="Upload" />
+        @ViewBag.Message
+    </div>
+}
+
+

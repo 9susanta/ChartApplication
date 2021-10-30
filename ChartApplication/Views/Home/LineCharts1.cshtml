@@ -1,4 +1,16 @@
-﻿<div class="row">
+﻿
+@{
+    ViewBag.Title = "LineCharts1";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h2>LineCharts1</h2>
+
+
+@{
+    ViewBag.Title = "Home Page";
+}
+<div class="row">
     <style>
         body {
             font-family: sans-serif;
@@ -76,6 +88,9 @@
             filter: drop-shadow( 0px 2px 2px rgba(90,90,90,.1) );
         }
     </style>
+
+    <button id="btnId">Click</button>
+
 
     <div>
         <script src="https://d3js.org/d3.v5.min.js"></script>
@@ -168,21 +183,25 @@
                 .call(text => text.append("tspan").attr("font-size", "21px").attr("fill", "#c21500").attr("font-weight", "bold").text("\xa0Positive cases\xa0"))
                 .call(text => text.append("tspan").attr("font-size", "17px").attr("fill-opacity", 0.8).text("\xa0 →"));
 
-            //--------------------------------------------------------------------------------------------------------------------------
+
+
+
+//--------------------------------------------------------------------------------------------------------------------------------
+
+
 
             // time format
             var format = d3.timeFormat("%d-%b-%Y");
             var parseTime = d3.timeParse("%d-%b-%Y");
-            var monthFormat = d3.timeFormat("%B %Y")
+            var monthFormat = d3.timeFormat("%b %Y")
 
             var color = d3.scaleOrdinal(d3.schemeTableau10)
 
-            // import json data
-            d3.json("..//data//covid-19-us-daily.json").then(function (data) {
+            d3.csv("..\\data\\outputses.csv").then(function (data) {
 
                 // create array of dict for colors and and icons
-                var case_types = [{ 'id': 'positiveIncrease', "title": "Positive Cases", "color": ["#fff3cc", "#ffc500", "#c21500"], "flag": "coronavirus.png" },
-                { 'id': 'totalTestResultsIncrease', "title": "Testings ", "color": ["#A7BFE8", "#0575E6", "#021B79"], "flag": "testing.png" }]
+                var case_types = [{ 'id': 'Australia', "title": "Australia", "color": ["#fff3cc", "#ffc500", "#c21500"], "flag": "coronavirus.png" },
+                    { 'id': 'Austria', "title": "Austria ", "color": ["#A7BFE8", "#0575E6", "#021B79"], "flag": "testing.png" }]
 
                 //create chunk
                 Object.defineProperty(Array.prototype, 'chunk', {
@@ -194,6 +213,11 @@
                     }
                 });
 
+                $("#btnId").click(function(){
+                    update();
+                })
+
+
                 color.domain(d3.keys(data[0]).filter(function (key) {
                     return key !== "date";
                 }));
@@ -204,7 +228,7 @@
                 });
 
                 // create chunked data
-                final = data.chunk(14);
+                final = data.chunk(3);
 
 
                 // format dataset to be input in the line creation function
@@ -224,12 +248,14 @@
                     });
 
                     return countries;
-                });
+                })
+                
 
                 // create color gradients
                 for (i in names) {
                     //add gradient
-                   
+                    // console.log(names[i]);
+                    // console.log("color index:", case_types.find(e => e.id === names[i]).title);
                     var linearGradient = svg.append("defs")
                         .append("linearGradient")
                         .attr("gradientUnits", "userSpaceOnUse")
@@ -255,11 +281,11 @@
                 line = d3.line()
                     .curve(d3.curveBasis)
                     .x(function (d) {
-                        
+
                         return x(d.date);
                     })
                     .y(function (d) {
-                        
+
                         if (d.cases > 0) {
                             return y(d.cases);
                         } else {
@@ -273,11 +299,9 @@
                     .range([0, width - 100])
                 var xAxis = d3.axisBottom()
                     .scale(x)
-                    .ticks(d3.timeWeek.every(1))
-                    //.tickFormat(d3.timeFormat("%d %b"))
-                    //.tickFormat(d3.time.week)
+                    .ticks(d3.timeMonth.every(1))
                     .tickFormat(function (d, i) {
-                        return "Week" + "-" + d3.timeFormat("%W")(d) + " | " + d3.timeFormat("%d %B")(d)
+                        return  d3.timeFormat("%b-%Y")(d)
                     })
                     .tickSizeInner(-height)
                     .tickPadding(10)
@@ -294,7 +318,8 @@
                 var yAxis = d3.axisLeft()
                     .scale(y)
                     .ticks(8)
-                //.tickSizeInner(-(width-100));
+
+
                 svg.append("g")
                     .attr("transform", `translate(10,0)`)
                     .attr("class", "y axis")
@@ -320,15 +345,12 @@
 
                 var intervalId = null;
 
-                console.log(final[final.length - 1][0].value.length);
-                if (final[final.length - 1][0].value.length < 14) {
-                    final = final.slice(0, final.length - 13)
+                
+                if (final[final.length - 1][0].value.length < 3) {
+                    final = final.slice(0, final.length - 2)
                 }
 
-               
-
                 var index = 0;
-                //update[index];
 
 
                 // update axis through out the loop in interval
@@ -361,7 +383,6 @@
                         .ease(d3.easeLinear)
                         .duration(duration)
                         .attr("stroke-width", 5.0)
-                        //.attr("stroke-opacity", 1)
                         .attr("stroke-opacity", function (d) {
                             if (d.value[d.value.length - 1].cases > 0) {
                                 return 1;
@@ -374,7 +395,7 @@
                         //     color(d.name)
                         // );
                         .attr("d", function (d) {
-                           
+
                             return line(d.value);
                         })
                         .attr("stroke", (d, i) => "url(#linear-gradient-" + d.name + ")");
@@ -402,7 +423,7 @@
                         .ease(d3.easeLinear)
                         .duration(duration)
                         .attr("d", function (d) {
-                            
+
                             return line(d.value);
                         })
                         .attr("stroke", (d, i) => "url(#linear-gradient-" + d.name + ")");
@@ -747,12 +768,13 @@
                 function update() {
 
                     if (index < final.length) {
-
+                        
                         data = final[index];
-                       
+                        //console.log("index: ",index)
+                        console.log("data_now: ",data);
 
                         var length = data[0].value.length;
-                       
+                        //console.log("length:",length);
 
                         // Create the X axis:
                         var param = data[0].value
@@ -760,7 +782,7 @@
                         date_end = new Date(param[param.length - 1].date)
                         date_end = new Date(new Date(date_end).setDate(new Date(date_end).getDate() + 6))
 
-                      
+                        //console.log("dates: ",date_start,date_end);
                         x.domain([date_start, date_end]);
 
                         // Create the Y axis:
@@ -781,11 +803,11 @@
 
                         makeLine(data)
 
-                        //makeTipCircle(data)
+                        makeTipCircle(data)
 
                         // makeImages(data)
 
-                        // makeLabels(data)
+                        makeLabels(data)
 
                         var weekOfMonth = (0 | data[0].value[data[0].value.length - 1].date.getDate() / 7) + 1;
                         var month = monthFormat(data[0].value[data[0].value.length - 1].date)
@@ -807,14 +829,12 @@
 
                 }
                 // start the interval method
-                intervalId = setInterval(update, duration);
-
+              // intervalId = setInterval(update, duration);
             });
 
-                 // merge and flatten the array
-                    //final = final.map((x,i) => [... final.slice(0,i+1)]).map(y=>y.flat())
-
-                    //console.log("after merge and flatten :", final)
         </script>
     </div>
 </div>
+
+
+

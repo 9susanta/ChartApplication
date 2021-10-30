@@ -1,0 +1,15 @@
+﻿
+@{
+    ViewBag.Title = "ConvertMonthlyTranspose";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h2>Convert Monthly to Transpose</h2>
+@using (Html.BeginForm("ConvertMonthlyTranspose", "CSV", FormMethod.Post, new { enctype = "multipart/form-data" }))
+{
+    <div>
+        @Html.TextBox("file", "", new { type = "file" }) <br />
+        <input type="submit" class="btn btn-success" value="Upload" />
+        @ViewBag.Message
+    </div>
+}

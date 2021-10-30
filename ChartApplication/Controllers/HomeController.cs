@@ -21,6 +21,11 @@ namespace ChartApplication.Controllers
             return View();
         }
 
+        public ActionResult LineCharts1()
+        {
+            return View();
+        }
+
         public ActionResult About()
         {
             ViewBag.Message = "Your application description page.";

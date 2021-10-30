@@ -131,10 +131,11 @@
 
 
         d3.csv(csvdataPath).then(function (data) {
-            
+            debugger
             data.forEach((d, i) => d.color = d3.hsl(Math.random() * 360, 1, 0.75));
 
             let yearSlice = data.sort((a, b) => {
+               
                 return d3.descending(+a[year], +b[year])
             }).slice(0, top_n);
 

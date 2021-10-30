@@ -171,6 +171,7 @@
                 .call(text => text.append("tspan").attr("font-size", "21px").attr("fill", "#c21500").attr("font-weight", "bold").text("\xa0Positive cases\xa0"))
                 .call(text => text.append("tspan").attr("font-size", "17px").attr("fill-opacity", 0.8).text("\xa0 →"));
 
+            //--------------------------------------------------------------------------------------------------------------------------
 
             // time format
             var format = d3.timeFormat("%d-%b-%Y");
@@ -181,11 +182,11 @@
 
             // import json data
             d3.json("..//data//covid-19-us-daily.json").then(function (data) {
-                debugger;
+                
                 // create array of dict for colors and and icons
                 var case_types = [{ 'id': 'positiveIncrease', "title": "Positive Cases", "color": ["#fff3cc", "#ffc500", "#c21500"], "flag": "coronavirus.png" },
-                { 'id': 'totalTestResultsIncrease', "title": "Testings ", "color": ["#A7BFE8", "#0575E6", "#021B79"], "flag": "testing.png" }]
-
+                    { 'id': 'totalTestResultsIncrease', "title": "Testings ", "color": ["#A7BFE8", "#0575E6", "#021B79"], "flag": "testing.png" }]
+                
                 //create chunk
                 Object.defineProperty(Array.prototype, 'chunk', {
                     value: function (chunkSize) {
@@ -195,7 +196,6 @@
                         return R;
                     }
                 });
-
 
                 color.domain(d3.keys(data[0]).filter(function (key) {
                     return key !== "date";
@@ -227,8 +227,7 @@
                     });
 
                     return countries;
-                })
-                console.log("after formating data for input : ", final);
+                });
 
 
                 // create color gradients
@@ -261,11 +260,11 @@
                 line = d3.line()
                     .curve(d3.curveBasis)
                     .x(function (d) {
-                        //console.log("line x:",x(new Date(d.date)));
+                        console.log("line x:", d.date);
                         return x(d.date);
                     })
                     .y(function (d) {
-                        //console.log("line y:",y(d.cases));
+                        console.log("line y:",(d.cases));
                         if (d.cases > 0) {
                             return y(d.cases);
                         } else {
@@ -375,10 +374,14 @@
                                 return 0;
                             }
                         })
-                        .attr("d", d => line(d.value))
+                       // .attr("d", d => line(d.value))
                         // .style("stroke", (d,i) =>
                         //     color(d.name)
                         // );
+                        .attr("d", function (d) {
+                            console.log("d",d.value);
+                            return line(d.value);
+                        })
                         .attr("stroke", (d, i) => "url(#linear-gradient-" + d.name + ")");
                     //.attr("stroke", (d,i) =>  color(d.name) );
 
@@ -403,10 +406,10 @@
                         .transition()
                         .ease(d3.easeLinear)
                         .duration(duration)
-                        .attr("d", d => line(d.value))
-                        // .style("stroke", (d,i) =>
-                        //     color(d.name)
-                        // )
+                        .attr("d", function (d) {
+                            console.log("enter d", d.value);
+                            return line(d.value);
+                        })
                         .attr("stroke", (d, i) => "url(#linear-gradient-" + d.name + ")");
                     //.attr("stroke", (d,i) =>  color(d.name));
 
@@ -784,11 +787,11 @@
 
                         makeLine(data)
 
-                        makeTipCircle(data)
+                        //makeTipCircle(data)
 
-                        makeImages(data)
+                       // makeImages(data)
 
-                        makeLabels(data)
+                       // makeLabels(data)
 
                         var weekOfMonth = (0 | data[0].value[data[0].value.length - 1].date.getDate() / 7) + 1;
                         var month = monthFormat(data[0].value[data[0].value.length - 1].date)
