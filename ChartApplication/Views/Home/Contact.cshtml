@@ -91,7 +91,7 @@
                 width = 1200 - margin.left - margin.right,
                 height = 650 - margin.top - margin.bottom;
 
-            duration = 1000
+            duration = 1000;
 
             // main content holder
             var svg = d3.select("#graph")
@@ -207,29 +207,33 @@
                     return key !== "date";
                 });
 
+                var namekeys = d3.keys(data[0]).filter(function (key) {
+                    return key !== "date";
+                });
+
 
                 // create chunked data
-                final = data.chunk(12);
+                final = data;
 
-
+                debugger;
                 // format dataset to be input in the line creation function
-                final = final.map(function (d) {
+                ////final = final.map(function (d) {
 
-                    countries = names.map(function (name) {
-                        return {
-                            name: name,
-                            value: d.map(function (t) {
-                                return {
-                                    date: new Date((t.date)),
-                                    cases: !isNaN(t[name]) ? +t[name] : 0
+                ////    countries = names.map(function (name) {
+                ////        return {
+                ////            name: name,
+                ////            value: d.map(function (t) {
+                ////                return {
+                ////                    date: new Date((t.date)),
+                ////                    cases: !isNaN(t[name]) ? +t[name] : 0
 
-                                };
-                            })
-                        }
-                    });
+                ////                };
+                ////            })
+                ////        }
+                ////    });
 
-                    return countries;
-                })
+                ////    return countries;
+                ////})
                 //console.log("after formating data for input : ", final);
 
 
@@ -267,9 +271,9 @@
                         return x(d.date);
                     })
                     .y(function (d) {
-
-                        if (d.cases > 0) {
-                            return y(d.cases);
+                        console.log(d);
+                        if (d.value > 0) {
+                            return y(d.value);
                         } else {
                             return y(-2)
                         }
@@ -283,7 +287,7 @@
                     .range([0, width - 100])
                 var xAxis = d3.axisBottom()
                     .scale(x)
-                    .ticks(d3.timeMonth.every(1))
+                    .ticks(d3.timeYear.every(10))
                     //.tickFormat(d3.timeFormat("%d %b"))
                     //.tickFormat(d3.time.week)
                     .tickFormat(function (d, i) {
@@ -315,10 +319,10 @@
                     .attr("class", "y axis")
                     .attr("clip-path", "url(#yaxisclip)")
 
-
-                var t = final[0][0].value
-                var month = monthFormat(t[t.length - 1].date)
-                var weekOfMonth = (0 | t[t.length - 1].date.getDate() / 7) + 1;
+               
+                //var t = final[0][0].value
+                var month = monthFormat(new Date(final[0].date));
+               // var weekOfMonth = (0 | t[t.length - 1].date.getDate() / 7) + 1;
 
 
                 let monthTxt = svg.append("text")
@@ -349,11 +353,11 @@
                 // update axis through out the loop in interval
                 function updateAxis() {
                     //update x axis
-                    svg.selectAll(".x.axis")
-                        .transition()
-                        .ease(d3.easeLinear)
-                        .duration(duration)
-                        .call(xAxis);
+                    //svg.selectAll(".x.axis")
+                    //    .transition()
+                    //    .ease(d3.easeLinear)
+                    //    .duration(duration)
+                    //    .call(xAxis);
 
 
                     // update y axis
@@ -378,19 +382,19 @@
                         .attr("stroke-width", 5.0)
                         //.attr("stroke-opacity", 1)
                         .attr("stroke-opacity", function (d) {
-                            if (d.value[d.value.length - 1].cases > 0) {
+                            console.log(d);
+                            //if (d.value[d.value.length - 1].cases > 0) {
                                 return 1;
-                            } else {
-                                return 0;
-                            }
+                            //} else {
+                               // return 0;
+                            //}
                         })
                         // .attr("d", d => line(d.value))
                         // .style("stroke", (d,i) =>
                         //     color(d.name)
                         // );
                         .attr("d", function (d) {
-
-                            return line(d.value);
+                            return line(d.values);
                         })
                         .attr("stroke", (d, i) => "url(#linear-gradient-" + d.name + ")");
                     //.attr("stroke", (d,i) =>  color(d.name) );
@@ -407,29 +411,29 @@
                         .attr("stroke-width", 5.0)
                         //.attr("stroke-opacity", 1)
                         .attr("stroke-opacity", function (d) {
-                            if (d.value[d.value.length - 1].cases > 0) {
+                            //if (d.value[d.value.length - 1].cases > 0) {
                                 return 1;
-                            } else {
-                                return 0;
-                            }
+                            //} else {
+                                //return 0;
+                            //}
                         })
                         .transition()
                         .ease(d3.easeLinear)
                         .duration(duration)
                         .attr("d", function (d) {
 
-                            return line(d.value);
+                            return line(d.values);
                         })
                         .attr("stroke", (d, i) => "url(#linear-gradient-" + d.name + ")");
                     //.attr("stroke", (d,i) =>  color(d.name));
 
                     // exit
-                    ////lines
-                    ////    .exit()
-                    ////    .transition()
-                    ////    .ease(d3.easeLinear)
-                    ////    .duration(duration)
-                    ////    .remove();
+                    lines
+                        .exit()
+                        .transition()
+                        .ease(d3.easeLinear)
+                        .duration(duration)
+                        .remove();
                 }
 
                 // update tip circle through out the loop in interval
@@ -760,6 +764,9 @@
 
                 var yaxisminlimit = 10;
 
+                var maxOfValue = 0;
+                var minOfValue = 0;
+                var currentdata = [];
                 // function to update the line in each frame
                 function update() {
 
@@ -767,43 +774,88 @@
 
                         data = final[index];
 
-                        var length = data[0].value.length;
-                        debugger;
+                        var keys = d3.keys(final[0]);
+
+                        var curobj = {};
+
+                        for (i in keys) {
+                            if (keys[i] == "date") {
+                                curobj[keys[i]] = new Date(data[keys[i]]);
+                            }
+                            else {
+                                curobj[keys[i]] = parseInt(data[keys[i]]);
+                            }
+                        }
+                       
+                        currentdata.push(curobj);
+                        
+
+                        for (i in namekeys) {
+
+                            var max = Math.max(...currentdata.map(function (o) {
+                                return o[namekeys[i]];
+                            }));
+                            var min = Math.min(...currentdata.map(function (o) {
+                                return o[namekeys[i]];
+                            }));
+                            if (maxOfValue <= max) {
+                                maxOfValue = max;
+                            }
+                            else if (minOfValue == 0) {
+                                minOfValue = min;
+                            }
+                            else if (minOfValue > min) {
+                                minOfValue = min;
+                            }
+                        }
+                        
+                        index = index + 1;
+                       // var length = data[0].value.length;
+                       
                         // Create the X axis:
-                        var param = data[0].value
+                        //var param = data[0].value
                         
 
                         // Create the Y axis:
-                        max_cases_value_of_each_country = data.map(o => Math.max(...o.value.map(v => v.cases)))
-                        var maxOfValue = Math.max(...max_cases_value_of_each_country.map(o => o))
-                        var minOfValue = Math.min(...max_cases_value_of_each_country.map(o => o));
+                        //max_cases_value_of_each_country = data.map(o => Math.max(...o.value.map(v => v.cases)))
+                        //var maxOfValue = Math.max(...max_cases_value_of_each_country.map(o => o))
+                        //var minOfValue = Math.min(...max_cases_value_of_each_country.map(o => o));
 
                         if (minOfValue < 10) {
                             yaxisminlimit = 0;
                         }
                         else if (minOfValue > yaxisminlimit) {
-                            yaxisminlimit = minOfValue * 0.8;
+                            yaxisminlimit = minOfValue ;
                         }
 
                         if (maxOfValue > yaxismaxlimit) {
-                            yaxismaxlimit = maxOfValue * 1.2;
+                            yaxismaxlimit = maxOfValue;
                         }
 
                         y.domain([yaxisminlimit, yaxismaxlimit]).nice();
 
                         updateAxis(x, y);
+                       
+                        var dataTranspose = namekeys.map(function (d) {
+                            return {
+                                name: d,
+                                values: currentdata.map(function (cd) {
+                                    return { date: cd.date, value: cd[d] };
+                                })
+                            };
+                        });
+                        debugger;
+                        makeLine(dataTranspose)
 
-                        makeLine(data)
-
-                        makeTipCircle(data)
+                        //makeTipCircle(data)
 
                         // makeImages(data)
 
-                        makeLabels(data)
+                        //makeLabels(data)
 
                         // console.log(data[0].value[data[0].value.length - 1].date);
 
-                        var month = monthFormat(data[0].value[data[0].value.length - 1].date)
+                        var month = monthFormat(new Date(data.date))
                         monthTxt
                             .transition()
                             .ease(d3.easeCubic)
@@ -811,7 +863,7 @@
                             .attr("fill-opacity", 0.7)
                             .text("← \xa0 " + month + " \xa0 →");
 
-                        index = index + 1;
+                        
 
                     } else {
                         // clear inetrval at the end
